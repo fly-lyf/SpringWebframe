@@ -8,16 +8,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.lookup.JndiDataSourceLookup;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
@@ -26,24 +24,24 @@ import java.util.Hashtable;
 import java.util.Map;
 
 @Configuration
-@EnableScheduling
-@EnableAsync(
-        mode = AdviceMode.PROXY, proxyTargetClass = false,
-        order = Ordered.HIGHEST_PRECEDENCE
+@EnableJpaRepositories(
+        basePackages = "fly.site.repositories",
+        entityManagerFactoryRef = "entityManagerFactoryBean",
+        transactionManagerRef = "jpaTransactionManager",
+        repositoryFactoryBeanClass = BaseRepositoryFactoryBean.class
 )
 @EnableTransactionManagement(
         mode = AdviceMode.PROXY, proxyTargetClass = false,
         order = Ordered.LOWEST_PRECEDENCE
 )
 @ComponentScan(
-        basePackages = "fly.site",
+        basePackages = "fly.site.controller",
         excludeFilters = @ComponentScan.Filter({Controller.class})
 )
 public class RootContextConfiguration {
 
     @Bean
-    public ObjectMapper objectMapper()
-    {
+    public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.findAndRegisterModules();
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
@@ -53,18 +51,15 @@ public class RootContextConfiguration {
     }
 
     @Bean
-    public DataSource clciResource()
-    {
+    public DataSource clciResource() {
         JndiDataSourceLookup lookup = new JndiDataSourceLookup();
         return lookup.getDataSource("jdbc/CLCI");
     }
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean()
-    {
+    public LocalContainerEntityManagerFactoryBean entityManagerFactoryBean() {
         Map<String, Object> properties = new Hashtable<>();
         properties.put("javax.persistence.schema-generation.database.action", "none");
-
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         adapter.setDatabasePlatform("org.hibernate.dialect.MySQL5InnoDBDialect");
 
@@ -80,8 +75,7 @@ public class RootContextConfiguration {
     }
 
     @Bean
-    public PlatformTransactionManager jpaTransactionManager()
-    {
+    public PlatformTransactionManager jpaTransactionManager() {
         return new JpaTransactionManager(
                 this.entityManagerFactoryBean().getObject()
         );

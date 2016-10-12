@@ -13,8 +13,7 @@ import javax.servlet.ServletRegistration;
 public class Bootstrap implements WebApplicationInitializer
 {
     @Override
-    public void onStartup(ServletContext container) throws ServletException
-    {
+    public void onStartup(ServletContext container) throws ServletException {
         container.getServletRegistration("default").addMapping("*.html","/js/*","/css/*","/img/*");
 
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();

@@ -1,6 +1,7 @@
 package fly.site.controller;
 
-import fly.site.repositories.interfaces.LysyRepository;
+import fly.site.entities.CiLysy;
+import fly.site.repositories.interfaces.CiLysyRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,11 +16,12 @@ import javax.inject.Inject;
 @Controller
 public class IndexController {
     @Inject
-    private LysyRepository lysyRepository;
+    private CiLysyRepository ciLysyRepository;
 
     @ResponseBody
     @RequestMapping(value = "/test", params = {"name"})
     public String helloName(@RequestParam("name") String name) {
+        ciLysyRepository.test(new CiLysy());
         System.out.println();
         return "test";
     }
